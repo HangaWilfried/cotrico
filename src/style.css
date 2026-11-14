@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+@plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: 'maciteconso';
+  default: true;
+
+  --color-primary: #11385f;
+  --color-secondary: #8ce262;
+  --color-accent: #8ce262;
+  --color-neutral: #222831;
+  --color-base-100: #eceff4;
+}
