@@ -23,6 +23,7 @@
     "@tanstack/vue-query": "^5.107.1",
     "@vee-validate/yup": "^4.15.1",
     "date-fns": "^4.4.0",
+    "notivue": "^2.4.5",
     "reka-ui": "^2.11.0",
     "tailwindcss": "^4.3.5",
     "tesseract.js": "^7.0.0",
