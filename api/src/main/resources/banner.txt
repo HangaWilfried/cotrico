@@ -1,0 +1,4 @@
+${AnsiColor.CYAN}
+${AnsiColor.YELLOW}         COTRICO
+${AnsiColor.DEFAULT}        Property
+Manager
