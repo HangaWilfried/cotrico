@@ -11,6 +11,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import org.cotrico.api.BaseEntity
+import org.cotrico.api.housingUnit.mappers.HousingUnitType
 import org.cotrico.api.meter.Meter
 
 @Entity

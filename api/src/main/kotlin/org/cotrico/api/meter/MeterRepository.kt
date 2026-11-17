@@ -63,6 +63,9 @@ interface MeterRepository : JpaRepository<Meter, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT m FROM Meter m WHERE m.id = :id")
     fun findByIdForUpdate(@Param("id") id: UUID): Meter?
+
+    @Query("SELECT DISTINCT m FROM Meter m LEFT JOIN FETCH m.readings WHERE m.id = :id")
+    fun findMeterWithReadings(@Param("id") id: UUID): Meter?
 }
 
 interface MeterReadingRepository : JpaRepository<MeterReading, UUID> {

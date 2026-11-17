@@ -1,6 +1,12 @@
 package org.cotrico.api.meter
 
 import jakarta.transaction.Transactional
+import org.cotrico.api.meter.mappers.CreateMeterDto
+import org.cotrico.api.meter.mappers.CreateMeterReadingDto
+import org.cotrico.api.meter.mappers.MeterDetailResponse
+import org.cotrico.api.meter.mappers.MeterReadingResponse
+import org.cotrico.api.meter.mappers.MeterResponse
+import org.cotrico.api.meter.mappers.MeterStatistics
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -8,9 +14,47 @@ import java.util.UUID
 
 @Service
 class MeterService(val meterRepository: MeterRepository, val meterReadingRepository: MeterReadingRepository) {
-    fun fetchAllMeters() = meterRepository.findAll()
+    fun fetchAllMeters(): List<MeterResponse> {
+        return meterRepository.findAll().map {
+            MeterResponse(
+                id = it.id,
+                serialNumber = it.serialNumber,
+                createdAt = it.createdAt,
+                updatedAt = it.updatedAt
+            )
+        }
+    }
 
-    fun findMeterById(id: UUID) = meterRepository.findById(id)
+    fun findMeterById(id: UUID): MeterResponse? {
+        return meterRepository.findById(id)
+            .orElse(null)
+            ?.let { meter ->
+                MeterResponse(
+                    id = meter.id,
+                    serialNumber = meter.serialNumber,
+                    createdAt = meter.createdAt,
+                    updatedAt = meter.updatedAt
+                )
+            }
+    }
+
+    @Transactional()
+    fun findMeterDetails(id: UUID): MeterDetailResponse? {
+        val meter = meterRepository.findMeterWithReadings(id)
+            ?: return null
+
+        return MeterDetailResponse(
+            id = meter.id,
+            serialNumber = meter.serialNumber,
+            readings = meter.readings.map {
+                MeterReadingResponse(
+                    id = it.id,
+                    indexValue = it.indexValue,
+                    readingDate = it.readingDate
+                )
+            }
+        )
+    }
 
     @Transactional fun createMeter(input: CreateMeterDto): UUID? {
         val meter = meterRepository.save(Meter(input.serialNumber))
@@ -26,8 +70,10 @@ class MeterService(val meterRepository: MeterRepository, val meterReadingReposit
            val lastReading = meterReadingRepository.findFirstByMeterIdOrderByReadingDateDesc(input.meterId)
            lastReading?.let {
                 previous -> {
-                    require(input.readingDate.isAfter(previous.readingDate))
+                    val newReadingDate = LocalDateTime.parse(input.readingDate)
+
                     require(input.currentIndex >= previous.indexValue)
+                    require(newReadingDate.isAfter(previous.readingDate))
 
                     saveMeterReading(it, input.currentIndex, input.readingDate)
                 }
@@ -50,8 +96,8 @@ class MeterService(val meterRepository: MeterRepository, val meterReadingReposit
         return MeterStatistics(currentIndex, lastIndex, consumption)
     }
 
-    private fun saveMeterReading(meter: Meter, index: BigDecimal, readingDate: LocalDateTime) {
-        val meterReading = MeterReading(meter, index, readingDate)
+    private fun saveMeterReading(meter: Meter, index: BigDecimal, readingDate: String) {
+        val meterReading = MeterReading(meter, index, LocalDateTime.parse(readingDate))
         meterReadingRepository.save(meterReading)
     }
 

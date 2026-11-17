@@ -1,4 +1,4 @@
-package org.cotrico.api.housingUnit
+package org.cotrico.api.housingUnit.mappers
 
 import java.util.UUID
 
