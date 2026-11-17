@@ -1,4 +1,11 @@
-${AnsiColor.CYAN}
-${AnsiColor.YELLOW}         COTRICO
-${AnsiColor.DEFAULT}        Property
-Manager
+ ____            __
+/\  _`\         /\ \__         __
+\ \ \/\_\    ___\ \ ,_\  _ __ /\_\    ___    ___
+ \ \ \/_/_  / __`\ \ \/ /\`'__\/\ \  /'___\ / __`\
+  \ \ \L\ \/\ \L\ \ \ \_\ \ \/ \ \ \/\ \__//\ \L\ \
+   \ \____/\ \____/\ \__\\ \_\  \ \_\ \____\ \____/
+    \/___/  \/___/  \/__/ \/_/   \/_/\/____/\/___/
+
+
+${application.title} ${application.version}
+Powered by Hanga Lagoue Wilfried Junior ${spring-boot.version}
