@@ -3,9 +3,9 @@ package org.cotrico.api.meter
 import jakarta.transaction.Transactional
 import org.cotrico.api.meter.mappers.CreateMeterDto
 import org.cotrico.api.meter.mappers.CreateMeterReadingDto
-import org.cotrico.api.meter.mappers.MeterDetailResponse
 import org.cotrico.api.meter.mappers.MeterReadingResponse
-import org.cotrico.api.meter.mappers.MeterResponse
+import org.cotrico.api.meter.mappers.MeterDetailResponse
+import org.cotrico.api.meter.mappers.MeterListItemResponse
 import org.cotrico.api.meter.mappers.MeterStatistics
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -14,34 +14,18 @@ import java.util.UUID
 
 @Service
 class MeterService(val meterRepository: MeterRepository, val meterReadingRepository: MeterReadingRepository) {
-    fun fetchAllMeters(): List<MeterResponse> {
-        return meterRepository.findAll().map {
-            MeterResponse(
-                id = it.id,
-                serialNumber = it.serialNumber,
-                createdAt = it.createdAt,
-                updatedAt = it.updatedAt
-            )
-        }
-    }
-
-    fun findMeterById(id: UUID): MeterResponse? {
-        return meterRepository.findById(id)
-            .orElse(null)
-            ?.let { meter ->
-                MeterResponse(
-                    id = meter.id,
-                    serialNumber = meter.serialNumber,
-                    createdAt = meter.createdAt,
-                    updatedAt = meter.updatedAt
-                )
-            }
+    fun fetchAllMeters() = meterRepository.findAll().map {
+        MeterListItemResponse(
+            id = it.id,
+            serialNumber = it.serialNumber,
+            createdAt = it.createdAt,
+            updatedAt = it.updatedAt
+        )
     }
 
     @Transactional()
     fun findMeterDetails(id: UUID): MeterDetailResponse? {
-        val meter = meterRepository.findMeterWithReadings(id)
-            ?: return null
+        val meter = meterRepository.findMeterWithReadings(id) ?: return null
 
         return MeterDetailResponse(
             id = meter.id,

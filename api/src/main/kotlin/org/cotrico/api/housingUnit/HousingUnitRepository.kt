@@ -6,30 +6,20 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.LockModeType
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.UniqueConstraint
 import org.cotrico.api.BaseEntity
+import org.cotrico.api.building.Building
 import org.cotrico.api.housingUnit.mappers.HousingUnitType
 import org.cotrico.api.meter.Meter
-
-@Entity
-@Table(name = "buildings")
-class Building (
-    @Column(nullable = false)
-    val name: String,
-
-    @Column
-    val description: String? = null,
-
-    @Column
-    val location: String? = null,
-
-    @OneToMany(mappedBy = "building")
-    var houseUnits: MutableList<HousingUnit> = mutableListOf()
-) : BaseEntity()
-
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.util.UUID
 
 @Entity
 @Table(
@@ -56,3 +46,9 @@ class HousingUnit (
     @OneToMany(mappedBy = "housingUnit")
     var meters: MutableList<Meter> = mutableListOf()
 ) : BaseEntity()
+
+interface HousingUnitRepository : JpaRepository<HousingUnit, UUID> {
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT DISTINCT h FROM HousingUnit h LEFT JOIN FETCH h.meters WHERE h.id = :id")
+    fun findHousingUnitWithMeters(@Param("id") housingUnitId: UUID): HousingUnit?
+}

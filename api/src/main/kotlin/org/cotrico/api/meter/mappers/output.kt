@@ -4,14 +4,12 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface MeterResponseDto
-
-data class MeterResponse(
+data class MeterListItemResponse(
     val id: UUID?,
     val serialNumber: String,
     val createdAt: LocalDateTime?,
     val updatedAt: LocalDateTime?
-) : MeterResponseDto
+)
 
 data class MeterReadingResponse(
     val id: UUID?,
@@ -23,4 +21,4 @@ data class MeterDetailResponse(
     val id: UUID?,
     val serialNumber: String,
     val readings: List<MeterReadingResponse>
-) : MeterResponseDto
+)

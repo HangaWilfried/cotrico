@@ -8,6 +8,6 @@ enum class HousingUnitType {
     OTHER
 }
 
-data class CreateBuildingDto(val name: String, val description: String?, val location: String?)
+data class CreateHousingUnitDto(val name: String, val buildingId: UUID, val type: HousingUnitType)
 
-data class CreateHousingUnitDto(val name: String, val buildingId: UUID, val meterId: UUID, val type: HousingUnitType)
+data class AssignMeterDto(val housingUnitId: UUID, val meterId: UUID)
