@@ -40,6 +40,9 @@ class MeterService(val meterRepository: MeterRepository, val meterReadingReposit
         )
     }
 
+    fun fetchAllMeterReadings() = meterReadingRepository.findAll().map {"${it.id} - ${it.readingDate} - ${it.createdAt}"}
+
+
     @Transactional fun createMeter(input: CreateMeterDto): UUID? {
         val meter = meterRepository.save(Meter(input.serialNumber))
         input.initialIndex?.let { saveMeterReading(meter, it, input.readingDate) }
@@ -47,11 +50,30 @@ class MeterService(val meterRepository: MeterRepository, val meterReadingReposit
         return meter.id
     }
 
-    @Transactional fun createMeterReading(input: CreateMeterReadingDto) {
-        val meter = meterRepository.findByIdForUpdate(input.meterId)
+    @Transactional
+    fun createMeterReading(meterId: UUID, input: CreateMeterReadingDto) {
+        val meter = meterRepository.findByIdForUpdate(meterId) ?: return
+
+        val lastReading = meterReadingRepository.findFirstByMeterIdOrderByReadingDateDesc(meterId)
+        val newReadingDate = LocalDateTime.parse(input.readingDate)
+
+        lastReading?.let { previous ->
+            require(input.currentIndex >= previous.indexValue) {
+                "Le nouvel index ne peut pas être inférieur à ${previous.indexValue}"
+            }
+            require(newReadingDate.isAfter(previous.readingDate)) {
+                "La date de lecture doit être postérieure à ${previous.readingDate}"
+            }
+        }
+
+        saveMeterReading(meter, input.currentIndex, input.readingDate)
+    }
+
+    /*BUG>>>@Transactional fun createMeterReading(meterId: UUID, input: CreateMeterReadingDto) {
+        val meter = meterRepository.findByIdForUpdate(meterId)
 
         meter?.let {
-           val lastReading = meterReadingRepository.findFirstByMeterIdOrderByReadingDateDesc(input.meterId)
+           val lastReading = meterReadingRepository.findFirstByMeterIdOrderByReadingDateDesc(meterId)
            lastReading?.let {
                 previous -> {
                     val newReadingDate = LocalDateTime.parse(input.readingDate)
@@ -63,7 +85,7 @@ class MeterService(val meterRepository: MeterRepository, val meterReadingReposit
                 }
            }
         }
-    }
+    }*/
 
     @Transactional fun loadCurrentConsumption(meterId: UUID) : MeterStatistics {
         val readings = meterReadingRepository.findTop2ByMeterIdOrderByReadingDateDesc(meterId)

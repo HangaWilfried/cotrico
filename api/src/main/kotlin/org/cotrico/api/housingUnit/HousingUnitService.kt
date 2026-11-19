@@ -8,6 +8,7 @@ import org.cotrico.api.housingUnit.mappers.CreateHousingUnitDto
 import org.cotrico.api.housingUnit.mappers.HousingUnitDetailsResponse
 import org.cotrico.api.housingUnit.mappers.HousingUnitListItemResponse
 import org.cotrico.api.housingUnit.mappers.MeterItemResponse
+import org.cotrico.api.meter.Meter
 import org.cotrico.api.meter.MeterRepository
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -38,10 +39,13 @@ class HousingUnitService(
             name = housingUnit.building.name,
         )
 
-        val meters = housingUnit.meters.map {
+        val meter = housingUnit.meters.sortedWith(
+            compareByDescending<Meter> { it.createdAt }
+            .thenByDescending { it.id }
+        ).firstOrNull()?.let {
             MeterItemResponse(
                 id = it.id,
-                serialNumber = it.serialNumber,
+                serialNumber = it.serialNumber
             )
         }
 
@@ -49,20 +53,28 @@ class HousingUnitService(
             id = housingUnit.id,
             name = housingUnit.name,
             type = housingUnit.type,
-            meters = meters,
+            meter = meter,
             building = building,
         )
     }
 
-    @Transactional fun create(housingUnit: CreateHousingUnitDto) = buildingRepository
-        .findById(housingUnit.buildingId)
-        .orElse(null)?.let {
-            building -> housingUnitRepository.save(HousingUnit(
-                name = housingUnit.name,
-                type = housingUnit.type,
+    @Transactional fun create(housingUnitInput: CreateHousingUnitDto): UUID? {
+        val building = buildingRepository
+            .findById(housingUnitInput.buildingId)
+            .orElseThrow {
+                IllegalArgumentException("Building with id ${housingUnitInput.buildingId} not found")
+            }
+
+        val housingUnit = housingUnitRepository.save(
+            HousingUnit(
+                name = housingUnitInput.name,
+                type = housingUnitInput.type,
                 building = building,
             )
-        )}
+        )
+
+        return housingUnit.id
+    }
 
     @Transactional fun assignMeter(input: AssignMeterDto) {
         val meter = meterRepository.findById(input.meterId).orElseThrow{

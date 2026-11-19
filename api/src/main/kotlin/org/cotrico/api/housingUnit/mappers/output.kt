@@ -20,5 +20,5 @@ data class HousingUnitDetailsResponse(
     val name: String,
     val type: HousingUnitType,
     val building: BuildingResponse,
-    val meters: List<MeterItemResponse>
+    val meter: MeterItemResponse?
 )

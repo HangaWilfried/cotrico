@@ -14,6 +14,10 @@ import java.util.UUID
 @RestController
 @RequestMapping("/meter")
 class MeterController(val meterService: MeterService) {
+    @GetMapping("/reading")
+    fun fetchAllMeterReadings() = meterService.fetchAllMeterReadings()
+
+
     @GetMapping fun fetchAllMeters() = meterService.fetchAllMeters()
 
     @PostMapping fun createMeter(@RequestBody input: CreateMeterDto) = meterService.createMeter(input)
@@ -25,5 +29,5 @@ class MeterController(val meterService: MeterService) {
     fun getMeterConsumption(@PathVariable id: UUID) = meterService.loadCurrentConsumption(id)
 
     @PutMapping("/{id}/consumption")
-    fun createMeterReading(@RequestBody input: CreateMeterReadingDto) = meterService.createMeterReading(input)
+    fun createMeterReading(@PathVariable id: UUID, @RequestBody input: CreateMeterReadingDto) = meterService.createMeterReading(meterId = id, input)
 }
